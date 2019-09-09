@@ -60,4 +60,4 @@ If you have implemented a feature that you think others find useful too, send me
 
 ## Disclaimer 
 
-*This software are rigorously tested, but mistakes can slip through anyways. Hence, use of this software is at your own risk! I can not be held liable for damages resulting from using this software. See also the license terms for more details.*
+*This software are rigorously tested, but mistakes can slip through anyways. Hence, use of this software is at your own risk! I can not be held liable for damages resulting from using this software. See also the [license terms](LICENSE) for details.*
