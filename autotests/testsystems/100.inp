@@ -1,0 +1,102 @@
+## Info
+# Format: 2
+# This is an example file to demonstrate the syntax of the input file.
+# 
+# The file consists of 7 blocks: Info, Nodes, Bars, Materials, NodalLoads, BarLoads
+# and BarEndLoads. Their order is arbitrary, only the designation of start and
+# ends are fixed. Lines like these that start with a # are comments. These can appear
+# everywhere in the document and will be ignored.
+#
+# In general, the tabular data is seperated by whitespace (tabs or spaces). 
+# For the sake of simplicity, not all values have to be given. Missing values will 
+# assume their respective defaults as specified. Values that are given in a Format
+# like x:[...] are highly optional and even the order of their appreance is inter-
+# changeable.  Also, indices start with 1.
+#
+# F2d doesnt know anything about units. So, you are responsible to put numbers in 
+# appropriate units. In this file, we use L=m, and F=kN.
+#
+## /Info
+
+## Nodes
+# Nodes are specified by their coodrdinates. (x is horizontal, positive to the right
+#  and postive y-direction is pointing upwards.) The node number is implied by 
+#  the order that nodes are specified.
+# Nodes may be locked (ie supported or restrained). 0=free, 1=locked. 
+#  if no values are given for locking, fully unlocked nodes are assumed.
+# Locks may also be rotated, as specified by r:[deg] (counter-clockwise, in 
+#  degrees, default: 0). unlocked degrees of freedom may be suppored by a 
+#  spring constant, specified by k:[k_x, k_y, k_phi] 
+#
+# x, y,  Locked (x,y,phi), r:LockRot(rotation of support), default: 0
+# r:[deg] .. counterclockwise rotation of supports
+# k:[k_x, k_y, k_phi] .. supports with spring stiffness
+-13  4          1 1 1           # fixed support for node no 1
+ -3  4          0 0 0           # completely unrestrained node 
+  0  0                          # completely unrestrained node at the origin
+ 4   0          0 1 0 r:[30]    # roller supported (support is rotated)
+-3  -3          1 1 0           # pin suppored
+## /Nodes
+
+
+## Bars
+# Bars (or members) go from one point i to another point j.
+# Here, we also specify the possible beam-end-locks (=BC, including coord-sys and 
+#  rotation) and material index.
+#
+# i, j, BC, optionals: m:[material idx], cs:[coordintate system idx] r:[rotation of hinge]
+# BC: [ux-i uy-i phi-i ux-j uy-j phi-j], possible default variants:
+# [] --> [1 1 1  1 1 1];
+# [phi-i phi-j] --> [1 1 phi-i  1 1 phi-j];
+1 2
+2 3    1 0        # right end can rotate
+3 4    0 1        # left end can rotate, right end rotates with pin-supported node
+5 2     m:[2]     # both ends are locked to node, but no other beams are connected to those, so effectively this is also a truss frame
+5 3    0 0  m:[2] # typical truss frame
+## /Bars
+
+## Materials
+# E ... Young's modulus [F/L^2], I ... moment of inertia [L^4], 
+# A ... cross section area [L^2], 
+# PltInfo... how beam is plotted. 1=normal beam, 2=thin beam (eg for braces)
+# E,    I,      A,      PltInfo
+1e7     1e-2    5e-3    1
+1e7     1e-3    1e-3    2
+## /Materials
+
+
+## NodalLoads
+# Loads on given node. positive values in positive coodrdinate directions.
+# (positive moment is counter-clockwise)
+# Node, Fx, Fy, Mz
+#2    33    13       0
+3       0 -14 0        # just a vertical downward force in node 3
+## /NodalLoads
+
+## BarLoads
+# Continous, linear load on a beam. (to have non-cont. loads on beam, split the beam)
+# q ... load in y-direction of specified CS (except in CS=1, for convinience its the other way round)
+# n ... load in x-direction of specified CS 
+# the indes i/j specify the values at the respective beam ends.
+# 
+# Beam, CS (1=fiber,2=global,3=proj-h,4=proj-v), Loads: qi, qj, ni, nj
+# default for loads:
+# [] --> [0 0 0 0]
+# [qi] --> [qi qi 0 0]
+# [qi qj] --> [qi qj 0 0]
+1    1    15 10        # downward trapezoidal load on beam no 1
+2    2    10 10 4 4    # horiz. and vertic. load on beam no 2
+## /BarLoads
+
+## BarEndLoads
+# single load on beam-ends. As opposed to node laods, this one here is acting on 
+# the beam. (this difference is visible in combination with beam-end-locks.
+# Beam, end, CS (1 or 2), load [Fx, Fy, M]
+2    1 1        0 -35 0        # load on beginning of beam 2. (could've also been 
+#                               specified as nodal load, but using cs=1, allows
+#                               us to place load perpendicular to the beam.
+#
+3    1 1        0  0 -60      # clockwise beam-end momend. this could NOT be 
+#                               specified as node load, as internal forces would 
+#                               be different then.
+## /BarEndLoads
